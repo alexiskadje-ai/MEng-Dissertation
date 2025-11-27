@@ -1,0 +1,18 @@
+AGRICULTURAL YIELD PREDICTION - ANALYSIS SUMMARY
+==================================================
+
+Analysis Date: 2025-09-03 20:12:25
+Total Plots Generated: 10
+Plots Directory: analysis_plots/
+
+Generated Visualizations:
+1. Branch Importance Analysis
+2. Regional ROI Comparison
+3. Yield vs Cost Relationship
+4. Climate-Yield Relationships
+5. Soil Health Distribution
+6. Temporal Trends
+7. Regional Yield Comparison
+8. Correlation Heatmap
+9. Prediction Accuracy
+10. Model Performance Summary

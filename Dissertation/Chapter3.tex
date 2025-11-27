@@ -1,0 +1,568 @@
+\chapter{METHODOLOGY}
+\label{ch3}
+
+\section{Introduction}
+
+This methodology is justified by the Literature Review (Table \ref{tab:related-studies}), which reveals that traditional models like WOFOST and DSSAT \cite{vanklompenburg2020,paudel2022} are data-intensive and poorly scalable in heterogeneous regions like the Western Highlands, while empirical approaches \cite{chigwada2023,ahmed2023} lack nonlinear spatiotemporal modeling. To address these gaps, a hybrid ConvLSTM-XGBoost framework with temporal attention is proposed, integrating multisource data (Earth Observation, climate, soil, agronomic), enabling early prediction (1-2 months pre-harvest), and ensuring interpretability via SHAP , directly fulfilling the study’s objectives.
+
+
+\section{Study Area}
+Cameroon lies in sub-Saharan Africa, located on the Gulf
+ of Guinea, between latitudes 1.7N–13.8N and longitudes 8.4E–16.8E. It has five major agro-ecological
+ zones: the inland equatorial forest; maritime equatorial
+ forest, highland tropical, Guinea-savannah, and Sudan
+savannah\cite{cameroon_agro}. These zones represent a majority of the agro
+ecological zones within which small-scale food production
+ is practised in sub-Saharan Africa.The Western Highlands of Cameroon are part of the country's mountainous region, situated in the Northwest and West Regions. Key coordinates range approximately between latitudes 5°N–7°N and longitudes 9°E–11°E. The area is characterized by  1,000–3,000 meters above sea level, with peaks like Mount Oku (3,011 m)\cite{xgboost_africa}.
+  \begin{figure}[H] % Positioning parameter: h (here), t (top), b (bottom), p (page)
+    \centering
+    \includegraphics[width=0.7\textwidth]{Figure/Western-Highlands.png} % Adjust width as needed
+    \caption{Western Highlands in Cameroon.\textit{Source:IPAD} }
+    \label{fig:example} % Label for referencing
+\end{figure}
+    \section{Proposed Methodology}
+    The research employs a five-phase analytical pipeline :
+  \subsection{\textbf{Mulitsource Data Collection and Fusion and Visualisation}}.
+  
+  \begin{table}[h]
+\centering
+\caption{Integrated Dataset Composition for Western Highlands Maize Yield Prediction}
+\label{tab:data_composition}
+\resizebox{\textwidth}{!}{ % Adjusts table width to page
+\begin{tabular}{@{}>{\bfseries}l p{3cm} c c p{3cm} p{2.5cm}@{}}
+\toprule
+\textbf{Data Category} & \textbf{Variables} & \textbf{Temporal Coverage} & \textbf{Spatial Resolution} & \textbf{Source} & \textbf{Preprocessing Applied} \\
+\midrule
+Satellite Imagery & NDVI, EVI, LST & 2020--2024 & 10m (S2) & ESA Copernicus Open Access Hub & Cloud masking \\
+& & & 30m (L8) & USGS EarthExplorer & Atmospheric correction \\
+\addlinespace
+Climate Data & Rainfall, Temperature & 2018--2024 & Station-point & Cameroon Met Agency & Kriging interpolation \\
+& Humidity, Solar Radiation & & & NASA POWER & Temporal downscaling \\
+\addlinespace
+Soil Properties & pH, N/P/K, Organic Matter & 2020--2024 & Field-level & IRAD Cameroon & Spatial interpolation \\
+\addlinespace
+Agronomic Practices & Fertilizer Use, Planting Dates & 2021--2023 & Farm-level & Farmer Surveys & Outlier removal \\
+\addlinespace
+Yield Records & Production, Area Harvested & 2018--2024 & Regional & MINADER & Unit standardization \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+\begin{enumerate}
+  \item \textbf{Satellite Imagery }:
+NDVI, EVI, and LST indices from Sentinel-2 (10m) and Landsat-8 (30m) tracking crop health and thermal stress across growing seasons (2020-2024).The NDVI and EVI can be calculated as follows\cite{Joshua2022} :
+\subsection*{NDVI (Normalized Difference Vegetation Index)}
+\[
+\text{NDVI} = \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}.....\cite{Joshua2022}
+\]
+Where:
+\begin{itemize}
+    \item \(\text{NIR}\) = Near-Infrared band reflectance
+    \item \(\text{Red}\) = Red band reflectance
+\end{itemize}
+
+\subsection*{EVI (Enhanced Vegetation Index)}
+\[
+\text{EVI} = G \cdot \frac{\text{NIR} - \text{Red}}{\text{NIR} + C_1 \cdot \text{Red} - C_2 \cdot \text{Blue} + L}.....\cite{Joshua2022}
+\]
+Where:
+\begin{itemize}
+    \item \(G\) = Gain factor (typically 2.5)
+    \item \(L\) = Canopy background adjustment (typically 1)
+    \item \(C_1\) and \(C_2\) = Coefficients for atmospheric resistance (typically 6.0 and 7.5, respectively)
+    \item \(\text{Blue}\) = Blue band reflectance
+\end{itemize}
+
+  \item \textbf{Climate Data :}
+Daily rainfall, temperature, humidity, and solar radiation records (2018-2024) from ground stations and NASA POWER, interpolated to field locations.
+
+  \item \textbf{Soil Properties} :
+Lab-tested pH, nitrogen, phosphorus, potassium, and organic matter measurements (2020-2024) from 120 sampling sites across the Western Highlands.
+
+  \item \textbf{Yield Records}
+Official maize production statistics (2018-2024) from MINADER, supplemented with ground-truth data from 45 monitored farms.
+
+\end{enumerate}
+\subsection{Data Pre-processing}
+The pre-processing and preliminary analysis were conducted to prepare the dataset for a predictive modeling framework, aligning with the discussed methodology for analyzing agricultural yield (Yield-tons-ha) based on environmental and management factors. The steps are detailed as follows:
+\begin{enumerate}
+    \item \textbf{Data Loading and Initial Inspection:} The dataset was loaded using pd.read\_csv() into a pandas DataFrame, with an initial check of shape and sample rows to confirm data integrity and structure.
+    \item \textbf{Missing Value Imputation}: Missing values were addressed by imputing numeric variables ( Rainfall\_mm, NDVI, Yield\_tons\_ha) with the median value per region using groupby('Region').transform('median'), accounting for regional variability\cite{Epule2024}. Categorical variables ( Irrigation\_Method, Soil\_Type) were imputed with the mode per region to preserve local agricultural practices\cite{chen2020tabular}. This region-specific imputation reduces bias compared to global imputation, reflecting the methodology’s emphasis on spatial heterogeneity\cite{Li2025}
+    \item \textbf{Date Feature Engineering}: Planting\_Date and Harvest\_Date were converted to datetime format, and the growing period (Growing\_Period\_Days) was calculated as the difference between harvest and planting dates. This temporal feature is critical for yield prediction models, capturing the crop cycle length influenced by regional climate\cite{cameroon_agro}.
+    \item \textbf{Categorical Encoding}: Categorical variables (Region, Irrigation\_Method, Soil\_Type, Fertilizer\_Use) were one-hot encoded using pd.get\_dummies() with drop\_first=True to avoid multicollinearity, preparing the data for machine learning algorithms that require numeric inputs\cite{singh2008artificial}.
+    \item \textbf{Normalization:} Numeric features ( Rainfall\_mm, Avg\_Temp\_C, NDVI) were standardized using StandardScaler to ensure a common scale, which is essential for models like regression or neural networks\cite{Mwaura2021}. Variables like Year, Production\_MT, and Area\_Harvested\_ha were excluded from scaling due to their non-ratio nature or role as target/derived metrics.
+    \item \textbf{Data Cleaning:} Rows with missing values in key predictor variables (Yield\_tons\_ha, Rainfall\_mm, NDVI) were dropped using dropna() to ensure the model has complete data for training\cite{Joshua2022}. Duplicate rows were removed with drop\_duplicates() to maintain data uniqueness.
+    \item \textbf{Summary and Export:} Post-processing checks included data types and descriptive statistics to validate the transformations. The preprocessed dataset was saved as Thesis\_data\_preprocessed.csv for subsequent modeling steps.  
+\begin{figure}[H] % Positioning parameter: h (here), t (top), b (bottom), p (page)
+    \centering
+    \includegraphics[width=0.8\textwidth]{Figure/Analysis-1.png} % Adjust width as needed
+    \caption{Descriptive Statistics of data.\textit{Source:Ouptut from JupyterNotebook} }
+    \label{fig:example} % Label for referencing
+\end{figure}
+\end{enumerate}
+The\textbf{ spatiotemporal data}, comprising temporal variables \textbf{(Year, Planting\_Date, Harvest\_Date, Growing\_Period\_Days) and spatial variable (Region), }was examined to understand the temporal and geographic coverage of the dataset. \textbf{The dataset spans the years 2018 to 2024, with unique years including 2018, 2019, 2020, 2021, 2022, 2023, and 2024. Spatially, the data covers 13 regions, including Western Highlands, Bafut, Fundong, Mbengwi, Kumbo, Ndop, Bali, Batibo, Bambili, Santa, and Jakiri.} The total number of records is 26, with 16 records containing complete Planting\_Date and Harvest\_Date information, indicating partial temporal data availability. The average growing period, calculated as the difference between harvest and planting dates, is approximately 133 days, though this varies by region due to missing data in some entries ( Western Highlands 2023 and 2024).
+\begin{figure}[H] % Positioning parameter: h (here), t (top), b (bottom), p (page)
+    \centering
+    \includegraphics[width=0.94\textwidth]{Figure/Spatiotemporal data.png} % Adjust width as needed
+    \caption{Spatiotemporal data.\textit{Source:Ouptut from JupyterNotebook} }
+    \label{fig:example} % Label for referencing
+\end{figure}
+The \textbf{tabular data, consisting of numerical ( Yield\_tons\_ha, Rainfall\_mm, Avg\_Temp\_C) and categorical (Soil\_Type, Irrigation\_Method) variables, was analyzed to summarize statistical properties and relationships.} Descriptive statistics for numeric columns indicate that Yield\_tons\_ha ranges from 1.6 to 2.5 tons per hectare (mean = 1.95, std = 0.23), Rainfall\_mm varies from 910 to 1350 mm (mean = 1087.5, std = 138.6), and Avg\_Temp\_C ranges from 21.8 to 25.1°C (mean = 23.4, std = 0.9). These statistics highlight the variability in environmental conditions and productivity across the dataset.
+
+
+
+  \subsection{\textbf{Feature Engineering}}
+  The purpose of this step is to transform raw data into meaningful predictors that captures agronomic processes like growth stages, stress responses, Environmental Interactions like soil-weather crop dynamics and regional specificity like Bimodal rainfall and soils\cite{jorvekar2024predictive}.
+  \begin{enumerate}
+   \item \textbf{{Temporal Weather features}}
+   \begin{itemize}
+  \item \textbf{Growing Degree Days.}\cite{singh2008growing}:
+  The growing degree days is calculated as :
+  \begin{equation}
+GDD = \sum_{i=1}^{n} \left( \frac{T_{\text{max}} + T_{\text{min}}}{2} - T_{\text{base}} \right)
+\end{equation}
+
+\noindent Where:
+\begin{itemize}
+\item $T_{\text{base}} = 10\,^{\circ}\text{C}$ (maize minimum growth temperature)
+\item $n$ = days in growing season
+\item $T_{\text{max}}$ = Daily maximum temperature ($^{\circ}\text{C}$)
+\item $T_{\text{min}}$ = Daily minimum temperature ($^{\circ}\text{C}$)
+\end{itemize}
+  \item \textbf{Rainfall Effectiveness Index(REI)}: The Rainfall effective Index is calculated as\cite{singh2008artificial} :
+  \begin{equation}
+REI = \frac{P_{30}}{\sqrt{SD_{30}}}
+\end{equation}
+
+\noindent Where:
+\begin{itemize}
+\item $P_{30}$ = 30-day cumulative rainfall (mm)
+\item $SD_{30}$ = Standard deviation of daily rainfall
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Critical thresholds for Western Highlands\cite{Suarez2024}}
+\label{tab:thresholds}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Feature} & \textbf{Vegetative Stage} & \textbf{Flowering Stage} & \textbf{Maturity Stage} \\
+\midrule
+Optimal GDD & 600-800$\,^{\circ}\text{C}$-days & 800-1000$\,^{\circ}\text{C}$-days & $>$1000$\,^{\circ}\text{C}$-days \\
+REI Threshold & $>$ 1.5 & $>$2.0 & $<$1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{itemize}
+   \item \textbf{{Topographic Features}}:
+Elevation variations (1500--3000\,m) create microclimates that significantly impact maize growth conditions in the Western Highlands\cite{zhang2023maize}.
+
+\begin{table}[h]
+\centering
+\caption{Topographic features and their agronomic relevance\cite{shap_agri}}
+\label{tab:topo_features}
+\begin{tabular}{>{\bfseries}l p{8cm}}
+\toprule
+\textbf{Feature} & \textbf{Relevance to Western Highlands} \\
+\midrule
+Slope Aspect & South-facing slopes dry faster due to increased solar exposure, affecting soil moisture retention and planting schedules\cite{adeyemo2023cocoa}. \\
+TWI (Topographic Wetness Index) & Predicts waterlogging in valley bottoms, crucial for managing drainage in high-rainfall areas (1500+ mm/year)\cite{Joshua2022}. \\
+Elevation & Temperature decreases approximately 0.6$^\circ$C per 100\,m elevation gain, creating distinct growing zones. \\
+Slope Gradient & Steeper slopes (>15\%) increase erosion risk, particularly during heavy rains in the March--June season\cite{jeong2022predicting}. \\
+\bottomrule
+\end{tabular}
+\end{table}
+ \item \textbf{{Growth-Stage Variables}}:
+Maize (\textit{Zea mays} L.) exhibits distinct physiological sensitivities during different phenological phases, requiring stage-specific management in Cameroon's Western Highlands\cite{Maimaitijiang2020}.
+
+\begin{table}[H]
+\centering
+\caption{Critical growth periods and management priorities for maize\cite{Perich2023}}
+\label{tab:growth_stages}
+\begin{tabular}{ll>{\raggedright\arraybackslash}p{8cm}}
+\toprule
+\textbf{Period (Days-after-planting)} & \textbf{Stage} & \textbf{Key Characteristics and Risks} \\
+\midrule
+0--20 & Emergence & 
+\begin{itemize}
+\setlength\itemsep{-0.5em}
+\item Vulnerable to soil crusting (especially in loamy sands)
+\item Requires soil temps > \SI{12}{\degreeCelsius} for germination
+\item 40\% crop loss risk from early-season droughts\cite{singh2008growing}
+\end{itemize} \\
+\addlinespace
+
+20--50 & Vegetative & 
+\begin{itemize}
+\setlength\itemsep{-0.5em}
+\item Nitrogen demand peaks (2--4 kg N/ha/day)
+\item Leaf Area Index (LAI) reaches 3.5--4.0
+\item Critical for weed competition management\cite{jorvekar2024predictive}
+\end{itemize} \\
+\addlinespace
+
+50--80 & Flowering & 
+\begin{itemize}
+\setlength\itemsep{-0.5em}
+\item Heat stress threshold: \SI{35}{\degreeCelsius} (reduces pollen viability)
+\item Water demand: 6--8 mm/day
+\item 70\% yield determination occurs in this phase\cite{vanlauwe2013maize}
+\end{itemize} \\
+\bottomrule
+\end{tabular}
+\end{table}
+\item \textbf{{Soil-Weather Interactions}}:
+\begin{itemize}
+\item \textbf{Nitrogen Mineralisation Potential}
+The temperature-dependent nitrogen release from organic matter is calculated as:
+
+\begin{equation}
+N_{min} = 0.08 \times \text{SOM} \times e^{0.07 \times T_{avg}}
+\end{equation}
+
+\noindent Where:
+\begin{itemize}
+\item $\text{SOM}$ = Soil Organic Matter (\%)
+\item $T_{avg}$ = 30-day average soil temperature (\si{\degreeCelsius})
+\item $N_{min}$ = Daily nitrogen mineralization rate (kg N/ha/day)\cite{convlstm_agri,chen2020tabular,zhang2023maize}
+\end{itemize}
+
+\textbf{Western Highlands Specific:}
+\begin{itemize}
+\item Lateritic soils (pH $<$ 5.5) reduce mineralization by 15--20\%
+\item Optimal range: $N_{min} > 1.2$\,kg/ha/day during vegetative stage (20--50 DAP)
+\end{itemize}
+
+\item\textbf{{Heat Stress Impact Factor}} : It
+quantifies flowering-stage stress using:
+
+\begin{equation}
+HSF = \sum_{\substack{\text{50--70 DAP}} \left(T_{max} > \SI{35}{\degreeCelsius}\right) \times \frac{RH}{100}
+\end{equation}
+
+\noindent Where:
+\begin{itemize}
+\item $T_{max}$ = Daily maximum temperature (\si{\degreeCelsius})
+\item $RH$ = Relative humidity at noon (\%)
+\item $HSF > 3$ indicates significant yield risk\cite{grace2022crop}
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Interaction feature thresholds for Western Highlands maize\cite{Joshua2022}}
+\label{tab:thresholds}
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature} & \textbf{Critical Stage} & \textbf{Alert Threshold} \\
+\midrule
+$N_{min}$ & Vegetative (20--50 DAP) & less than 1.0\,kg/ha/day\cite{finnegan2025temporal} \\
+$HSF$ & Flowering (50--70 DAP) & greater than 3.0\cite{Epule2024} \\
+\bottomrule
+\end{tabular}
+\end{table}
+ \end{enumerate}
+\subsection{Hybrid ConvLSTM-XGBoost Modelling}
+\subsubsection{ConvLSTM} A Convolutional Long Short-Term Memory (ConvLSTM) network is specifically designed to analyze both spatial and temporal patterns in our satellite and climate data \cite{convlstm_agri}.It is adopted because it sees field conditions (via satellite pixels,remembers how these conditions change over time and predicts how these changes will affect maize yields\cite{singh2008growing}.
+The ConvLSTM branch processes structured spatiotemporal data through a carefully designed architecture\cite{zhang2023maize}. The input consists of 12 sequential snapshots (typically bi-weekly over a growing season) of 64×64 grid cells, where each cell represents environmental conditions across five key channels: NDVI and EVI for vegetation health, LST for thermal stress, plus rainfall and air temperature measurements.\textbf{ This 12 × 64 × 64 × 5 tensor effectively creates a time-lapse "video" of maize field conditions without requiring raw imagery.}
+
+\textbf{The model architecture employs two ConvLSTM layers - the first with 32 filters detects localized stress patterns (like drought patches), while the second with 64 filters identifies longer-term trends (such as progressive nutrient deficiency).}\cite{convlstm_agri} Through specialized memory cells, it learns crucial temporal relationships like how 3 consecutive weeks of high LST during flowering reduces pollen viability. The network outputs a 256-dimensional feature vector that compactly encodes the field's health evolution, which later combines with management data through an attention mechanism.\cite{convlstm_agri}
+
+This approach excels at capturing yield-critical phenomena: early drought signals from NDVI/LST correlations, disease spread patterns visible in EVI fluctuations, and delayed greening effects from rainfall deficits\cite{convlstm_agri}. By processing both the spatial arrangement and temporal progression of stress factors, it provides unique insights beyond traditional tabular analysis - particularly valuable for Cameroon's variable highland microclimates where localized conditions often determine yield outcomes\cite{yan2025crop}.
+\begin{center}
+\begin{tikzpicture}[
+    node distance=0.75cm,
+    block/.style={draw, rectangle, minimum height=1.5cm, minimum width=2cm, text width=1.8cm, align=center},
+    tensor/.style={draw, rectangle, minimum height=1cm, minimum width=0.6cm, fill=blue!20},
+    arrow/.style={->, thick, >=stealth}
+]
+
+% Input Tensor
+\node[tensor, fill=green!20, minimum width=3cm, label=below:{\footnotesize Time steps (12)}] (input) {\footnotesize $12 \times 64 \times 64 \times 5$};
+\node[above=0.1cm of input] {\textbf{Input}};
+
+% ConvLSTM Layers
+\node[block, right=2.5cm of input, fill=orange!20] (conv1) {ConvLSTM \\ 32 filters \\ $3 \times 3$};
+\node[block, right=of conv1, fill=orange!20] (conv2) {ConvLSTM \\ 64 filters \\ $3 \times 3$};
+
+% Flattened Output
+\node[block, right=of conv2, fill=red!20] (flatten) {Flatten};
+\node[block, right=of flatten, fill=gray!20] (dense) {Dense \\ Feature Vector};
+
+% Arrows
+\draw[arrow] (input) -- (conv1);
+\draw[arrow] (conv1) -- (conv2);
+\draw[arrow] (conv2) -- (flatten);
+\draw[arrow] (flatten) -- (dense);
+
+% Annotations
+\node[above=0.2cm of conv1] {\textbf{ConvLSTM Stack}};
+\node[above=0.2cm of dense] {\textbf{Output}};
+
+\end{tikzpicture}
+\captionof{figure}{ConvLSTM Branch for spatiotemporal data}
+\label{fig:tikz_outside}
+
+  \label{fig:convlstm}
+\end{center}
+\subsubsection{XGBoost Branch}
+The XGBoost branch processes tabular agricultural data from your study area. It takes 28 key features including soil properties (pH, nitrogen levels), topographic factors (elevation, slope), and farming practices (planting dates, fertilizer use)\cite{chen2020tabular}. Each field is represented as a numerical vector capturing these characteristics\cite{Epule2024}.
+
+The model uses an ensemble of 100 decision trees to analyze relationships between variables. Each tree makes simple rules like "If soil nitrogen is low and rainfall is below average, predict lower yield."\cite{Epule2024} The trees work together to identify complex patterns while avoiding overfitting through careful depth control (max depth=6)\cite{xgboost_africa}.
+ This helps identify which factors most impact yields in the Western Highlands, such as soil acidity or planting timing.
+ \begin{center}
+ \begin{tikzpicture}[
+    node distance=1.5cm,
+    feat/.style={rectangle, rounded corners, draw=black, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered},
+    tree/.style={ellipse, draw=black, fill=green!20, minimum width=1cm},
+    output/.style={rectangle, draw=black, fill=red!20, minimum width=2cm, minimum height=1cm, text centered},
+    arrow/.style={->, >=stealth}
+]
+
+% Input nodes
+\node (soil) [feat] {Soil Data \\ (pH, N, P, K)};
+\node (topo) [feat, below of=soil] {Topography \\ (Elevation, Slope)};
+\node (mgmt) [feat, below of=topo] {Management \\ (Planting, Fertilizer)};
+
+% XGBoost trees
+\node (tree1) [tree, right of=soil, xshift=5cm] {Tree 1};
+\node (tree2) [tree, below of=tree1] {Tree 2};
+\node (dots) [below of=tree2] {\vdots};
+\node (tree100) [tree, below of=dots] {Tree 100};
+
+% Output
+\node (out) [output, right of=tree2, xshift=2cm] {128D Feature Vector};
+
+% Arrows
+\draw [arrow] (soil) -- (tree1);
+\draw [arrow] (soil) -- (tree2);
+\draw [arrow] (soil) -- (tree100);
+
+\draw [arrow] (topo) -- (tree1);
+\draw [arrow] (topo) -- (tree2);
+\draw [arrow] (topo) -- (tree100);
+
+\draw [arrow] (mgmt) -- (tree1);
+\draw [arrow] (mgmt) -- (tree2);
+\draw [arrow] (mgmt) -- (tree100);
+
+\draw [arrow] (tree1) -- (out);
+\draw [arrow] (tree2) -- (out);
+\draw [arrow] (tree100) -- (out);
+
+\end{tikzpicture}
+\captionof{figure}{XGBoost Branch for tabular data}
+\label{fig:tikz_outside}
+\end{center}
+
+\subsubsection{Late - Stage Fusion with Attention Mechanism}
+At the fusion layer, the flattened ConvLSTM output (spatiotemporal feature vector) is concatenated with the static variable matrix to form a unified feature representation\cite{chen2020tabular,singh2008artificial,Willighagen_2019_Citation}. This concatenated vector, typically of higher dimensionality (64 ConvLSTM features + 10 static features), serves as the input to the XGBoost model. The fusion layer ensures that both dynamic (time-series) and static (non-temporal) data are integrated into a single predictive framework, allowing the model to leverage their complementary information\cite{zhang2023maize}.
+\begin{enumerate}
+    \item \textbf{Concatenation:}
+The two vectors are merged into a single 384-D vector
+
+\section*{Mathematical Representation}
+
+To enhance the visibility of the mathematical formulation, we present the following equations in a larger font size:
+
+
+Let \( \mathbf{H}_{ConvLSTM} \in \mathbb{R}^{n \times d_1} \) represent the ConvLSTM output for \( n \) samples with \( d_1 \) features, and \( \mathbf{X}_{static} \in \mathbb{R}^{n \times d_2} \) denote the static variables with \( d_2 \) features. The fusion layer performs:
+
+\[
+\mathbf{X}_{fused} = [\mathbf{H}_{ConvLSTM}, \mathbf{X}_{static}] \in \mathbb{R}^{n \times (d_1 + d_2)}
+\]
+
+where \( \mathbf{X}_{fused} \) is the concatenated feature matrix fed into XGBoost for final yield prediction\cite{zhang2023maize}.
+
+    \item \textbf{Attention weight Calculation:}
+    A small neural network computes branch importance:
+    \textbf{\alpha = \sigma(W_a \cdot V_{concat} + b_a)}...\cite{xgboost_africa}
+    
+
+     \item \textbf{Weighted Fusion:}
+     Final prediction blends both branches:
+     
+    \textbf{ y_{pred} = \alpha \cdot V_{ConvLSTM} + (1-\alpha) \cdot V_{XGBoost}}...\cite{xgboost_africa}
+     
+\end{enumerate}
+
+\begin{center}
+\resizebox{1.0\textwidth}{!}{%  % Scales the figure to 90% of text width
+\begin{tikzpicture}[
+    node distance=0.4cm,
+    vec/.style={rectangle, draw=black, minimum width=1.2cm, minimum height=0.7cm, font=\small},
+    ann/.style={rectangle, draw=black, fill=gray!20, text width=1.8cm, font=\small, align=center},
+    arrow/.style={-Stealth, shorten >=1pt, shorten <=1pt}
+]
+
+% Input vectors
+\node (conv) [vec, fill=blue!20] {ConvLSTM \\ 256D};
+\node (xgb) [vec, fill=green!20, below=of conv] {XGBoost \\ 128D};
+
+% Concatenation
+\node (concat) [vec, fill=orange!20, right=of conv, xshift=1.5cm] {Concat \\ 384D};
+\draw [arrow] (conv) -- (concat);
+\draw [arrow] (xgb) -- (concat);
+
+% Attention
+\node (att) [ann, right=of concat, xshift=0.5cm] {Attention Network \\ $\alpha = \sigma(W_a V + b_a)$};
+\draw [arrow] (concat) -- (att);
+
+% Weights
+\node (alpha) [vec, fill=red!20, above right=of att, yshift=-0.3cm, xshift=0.3cm] {$\alpha$};
+\node (1ma) [vec, fill=red!20, below right=of att, yshift=0.3cm, xshift=0.3cm] {$1-\alpha$};
+\draw [arrow] (att) -- (alpha);
+\draw [arrow] (att) -- (1ma);
+
+% Weighted vectors
+\node (wconv) [vec, fill=blue!10, right=of alpha, xshift=0.5cm] {$\alpha \cdot V_{CL}$};
+\node (wxgb) [vec, fill=green!10, right=of 1ma, xshift=0.5cm] {$(1-\alpha) \cdot V_{XGB}$};
+\draw [arrow] (alpha) -- (wconv);
+\draw [arrow] (1ma) -- (wxgb);
+
+% Sum
+\node (sum) [circle, draw, right=of wconv, yshift=-0.4cm, xshift=0.2cm] {$+$};
+\draw [arrow] (wconv) -- (sum);
+\draw [arrow] (wxgb) -- (sum);
+
+% Output
+\node (out) [vec, fill=purple!20, right=of sum, xshift=0.2cm] {Yield \\ Pred.};
+\draw [arrow] (sum) -- (out);
+\end{tikzpicture}
+
+}
+\captionof{figure}{Fusion and attention mechanism}
+\label{fig:tikz_outside}
+\end{center}
+\subsection{Model Development and Training}
+\label{sec:model_development}
+
+The hybrid ConvLSTM-XGBoost model is developed to capture both spatiotemporal dynamics and static agricultural features for maize yield prediction. The development process involves the following steps:
+
+\begin{enumerate}
+    \item \textbf{Data Preparation}: The preprocessed dataset, saved as \texttt{Thesis\_data.csv}, is split into training (70\%), validation (15\%), and test (15\%) sets, ensuring temporal and spatial stratification to avoid data leakage across regions and years \cite{Wang2023}.
+    \item \textbf{ConvLSTM Branch}: The ConvLSTM branch processes a $12 \times 64 \times 64 \times 5$ tensor comprising bi-weekly snapshots of NDVI, EVI, LST, rainfall, and temperature. The architecture includes two ConvLSTM layers (32 and 64 filters, respectively) with ReLU activation, followed by a flattening layer to produce a spatiotemporal feature vector \cite{Janssen2017}.
+    \item \textbf{XGBoost Branch}: The XGBoost branch processes 28 tabular features, including soil properties (pH, nitrogen, phosphorus), topographic factors (elevation, slope), and management practices (planting dates). The model uses 100 decision trees with a maximum depth of 6, a learning rate of 0.1, and L2 regularization to prevent overfitting \cite{finnegan2025temporal}.
+    \item \textbf{Late-Stage Fusion}: The spatiotemporal and tabular feature vectors are concatenated and passed through a dense layer with an attention mechanism to weigh branch contributions. The attention mechanism is implemented as a small neural network computing weights based on feature importance \cite{Chaudhari2021}.
+    \item \textbf{Training}: The model is trained for 100 epochs with the Adam optimizer (learning rate = 0.001) for the ConvLSTM branch and early stopping based on validation loss. XGBoost parameters are tuned using grid search over learning rate (0.01, 0.1, 0.3) and tree depth (4, 6, 8) \cite{Wang2023}.
+    \item \textbf{Validation}: Spatial cross-validation (leave-one-region-out) is employed to ensure generalizability across the Western Highlands' diverse microclimates. Ground-truth yield data from 45 monitored farms validate model performance \cite{smith2022remote}.
+\end{enumerate}
+
+This approach ensures a robust and interpretable model tailored to the Western Highlands' unique agricultural conditions.
+
+\subsection{SHAP-based Interpretability}
+The SHapley Additive exPlanations is a Machine Learning method used to explain the output of machine learning models by assigning each feature an importance value for a particular prediction\cite{shap_agri}.In our context, it explains why the model makes specific yield predictions, helping farmers and policymakers understand key drivers,Identifies which factors (NDVI, rainfall, soil pH) most influence yield predictions and Shows how the same factor impacts yields differently across other areas\cite{shap_agri}.
+\subsection{Model Validation and Generalisation}
+\subsubsection{Leave-One-Region-Out Cross Validation}
+To evaluate generalisability across different agro-ecological zones in Cameroon, we adopt a Leave-One-Region-Out (LORO) cross-validation approach\cite{khairulzaman2014impacts}. The Western Highlands is divided into five major maize-growing divisions ( Mezam, Ngoketunjia, Menoua, Bui, Bamboutos)\cite{Epule2024,zhang2023maize}. In each fold, the model is trained on four divisions and tested on the fifth, rotating until all regions have served as the test set\cite{Joshua2022}.
+
+This strategy simulates deployment in unseen regions and mitigates regional overfitting. It also reflects real-world scenarios where local field data may be limited\cite{Joshua2022,okafor2019phenological}.
+\subsubsection{Evaluation Metrics}
+We use three core metrics to assess performance:
+\begin{itemize}
+  \item \textbf{Mean Absolute Error (MAE):}
+  MAE measures the average absolute difference between predicted yield values ($ \hat{y}_i $) and observed yield values ($ y_i $) across $ n $ samples, calculated as:
+  \begin{equation}
+    \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} | \hat{y}_i - y_i |
+  \end{equation}
+  MAE gives an intuitive average error in tons/hectare.
+In the context of this study, MAE provides a straightforward indicator of the average magnitude of errors in yield predictions, expressed in tons per hectare\cite{zhang2023maize}. Given the variability in yield data (mean ≈ 1.95 tons/ha, std ≈ 0.23), a low MAE indicates that the model’s predictions are closely aligned with actual yields, which is critical for practical agricultural decision-making ( resource allocation)\cite{chen2020tabular}.
+
+
+  \item \textbf{Root Mean Squared Error (RMSE):} RMSE measures the square root of the average squared differences between predicted and observed yields given by :
+  \begin{equation}
+    \text{RMSE} = \sqrt{ \frac{1}{n} \sum_{i=1}^{n} ( \hat{y}_i - y_i )^2 }
+  \end{equation}
+RMSE provides a metric that penalizes larger errors more heavily due to the squaring operation, making it sensitive to outliers in yield predictions\cite{Joshua2022}. In this study, RMSE is particularly relevant given the potential for extreme weather events (drought or heavy rainfall) affecting yield in the Western Highlands, which could lead to significant prediction deviations\cite{zhang2023maize}. Expressed in tons per hectare, RMSE offers a comparable scale to MAE but emphasizes the need for precision in high-error scenarios\cite{Epule2024}.
+
+  \item \textbf{Coefficient of Determination (R\textsuperscript{2}):} $ R^2 $ quantifies the proportion of variance in the observed yield values that is predictable from the independent variables (features in $ \mathbf{X}_{fused} $), defined as:
+  \begin{equation}
+    R^2 = 1 - \frac{ \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 }{ \sum_{i=1}^{n} (y_i - \bar{y})^2 }
+  \end{equation}
+ For this study, $ R^2 $ assesses how well the ConvLSTM-XGBoost model captures the relationships between spatiotemporal features (NDVI trends over time) and static features (Soil\_Type) with yield\cite{okafor2019phenological}. A high $ R^2 $ (close to 1) indicates that the model explains a large portion of the yield variability, reflecting the effectiveness of the fusion layer in integrating diverse data types\cite{momenpour2024bibliometric}. Given the complex interactions between climate (Rainfall\_mm, Avg\_Temp\_C), soil properties, and imagery indices, $ R^2 $ is crucial for validating the model’s explanatory power\cite{smith2022remote}.
+ 
+ These metrics collectively provide a robust framework to assess the model’s accuracy (MAE), explanatory power ($ R^2 $), and precision (RMSE), aligning with the methodology’s goal of leveraging advanced machine learning to predict yield based on diverse data sources\cite{taffese2019determinants}. The results will guide hyperparameter tuning (XGBoost learning rate, ConvLSTM layers) and inform the reliability of predictions for stakeholders in the Western Highlands\cite{khairulzaman2014impacts}.
+\end{itemize}
+\section{System Architecture}
+The proposed architecture for predicting agricultural yield in the Western Highlands of Cameroon is a hybrid model that combines a Convolutional Long Short-Term Memory (ConvLSTM) network with an XGBoost (Extreme Gradient Boosting) classifier\cite{Benti2024}. This architecture is designed to exploit the spatiotemporal dynamics of satellite imagery data and the contextual richness of static variables, addressing the challenges of ground data sparsity and regional variability\cite{Chaudhari2021}. The development and validation of this model were conducted using Python in a Jupyter Notebook environment, with data preprocessing, feature engineering, and performance evaluation tailored to the Thesis\_data.csv dataset.
+The figure below shows the Global Architecture of our Solution.
+ \begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.6cm and 0.15cm,
+    stage/.style={draw, rounded corners, fill=blue!10, minimum width=2cm, minimum height=0.9cm, align=center, font=\footnotesize},
+    branch/.style={draw, rounded corners, fill=orange!10, minimum width=1.6cm, minimum height=0.7cm, align=center, font=\scriptsize},
+    arrow/.style={->, >=stealth, thick, font=\tiny}
+]
+
+% Data Input Stage
+\node[stage] (input) {Data Collection \\ \scriptsize Satellite + Weather + Soil};
+
+% Feature Engineering Stage
+\node[stage, right=1.2cm of input] (features) {Feature Engineering \\ \scriptsize NDVI/EVI/LST Features};
+
+% Model Branching
+\node[branch, above right=0.5cm and 0.6cm of features] (convlstm) {ConvLSTM \\ \scriptsize Spatio-temporal};
+\node[branch, below right=0.5cm and 0.6cm of features] (xgboost) {XGBoost \\ \scriptsize Tabular};
+
+% Fusion
+\node[stage, right=1.8cm of features] (fusion) {Feature Fusion \\ \scriptsize Weighted};
+
+% Output Stage
+\node[stage, right=1.2cm of fusion] (output) {Yield Prediction \\ \scriptsize + Uncertainty};
+
+% Explanation & Deployment
+\node[stage, below=0.3cm of output] (explain) {SHAP Analysis \\ \scriptsize Explanation};
+\node[stage, above=0.3cm of output] (deploy) {Deployment \\ \scriptsize Dashboard/API};
+
+% Arrows
+\draw[arrow] (input) -- (features);
+\draw[arrow] (features) -| (convlstm);
+\draw[arrow] (features) -| (xgboost);
+\draw[arrow] (convlstm) -- (fusion);
+\draw[arrow] (xgboost) -- (fusion);
+\draw[arrow] (fusion) -- (output);
+\draw[arrow] (output) -- (deploy);
+\draw[arrow] (output) -- (explain);
+
+\end{tikzpicture}
+\caption{Pipeline Architecture for Maize Yield Prediction System}
+\label{fig:pipeline_architecture}
+\end{figure}
+\section{Tools and Technologies}
+The development, preprocessing, and validation of the hybrid ConvLSTM-XGBoost model for yield prediction relied on a suite of advanced tools and technologies, selected for their compatibility with spatiotemporal data analysis and machine learning workflows. The following table outlines the tools, their latest versions, and justifications for their use.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{10cm}|}
+        \hline
+        \textbf{Tools/Technologies} & \textbf{Justification} \\
+        \hline
+        Python 3.12 & The primary programming language, offering extensive libraries for data science; its latest version ensures performance and security updates for efficient model development. \\
+        \hline
+        Pandas 2.2.2 & Used for data manipulation and pre-processing (handling missing values, categorization); its recent release enhances data frame operations critical for large datasets. \\
+        \hline
+        NumPy 2.0.0 & Supports numerical computations and array operations, essential for feature engineering and matrix operations in ConvLSTM; the latest version improves computational efficiency. \\
+        \hline
+        Matplotlib 3.9.0 & Facilitates data visualization ( yield distributions, correlation plots); the updated version provides enhanced plotting capabilities for thesis figures. \\
+        \hline
+        Seaborn 0.13.2 & Enhances statistical visualizations (boxplots, heatmaps); its recent updates ensure compatibility with Matplotlib for clear data representation. \\
+        \hline
+        TensorFlow 2.17.0 & Powers the ConvLSTM network for spatiotemporal feature extraction; the latest version offers optimized GPU support and improved model training stability. \\
+        \hline
+        XGBoost 2.1.1 & Implements the gradient-boosting model for yield prediction; its recent update includes performance enhancements for handling fused feature matrices. \\
+        \hline
+        Scikit-learn 1.5.1 & Provides tools for data scaling, cross-validation, and metric calculation (MAE, RMSE, \( R^2 \)); the latest version ensures robust validation workflows. \\
+        \hline
+        Google Earth Engine (GEE) 0.1.391 & Enables collection of satellite imagery (NDVI, LST, EVI, GCVI, GNDVI) via cloud computing; the updated version supports advanced geospatial processing for the Western Highlands. \\
+        \hline
+    \end{tabular}
+    \caption{Tools and Technologies with Justifications}
+    \label{tab:tools_technologies}
+\end{table}
+\section{Conclusion}
+   This chapter designed a hybrid ConvLSTM-XGBoost model to predict maize yields in Cameroon’s Western Highlands by fusing satellite time-series, soil data, and farmer practices. The methodology addresses regional challenges like elevation-driven microclimates and erratic rainfall while providing interpretable insights via SHAP. More enhancements will focus on rigorous validation,including spatial cross-validation (leave-one-region-out) and ground-truth comparisons with farm-level yield data to ensure reliability for smallholder conditions.
+   
+   
+   
+  
+
+  

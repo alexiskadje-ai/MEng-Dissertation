@@ -1,0 +1,229 @@
+\chapter{LITERATURE REVIEW}
+\label{ch2}
+
+\section{Introduction}
+This chapter provides a critical review of existing literature relevant to predictive analytics in agriculture, specifically focusing on crop yield optimisation through machine learning techniques. The review begins with global studies on agricultural prediction, narrows down to the African context, and finally highlights the situation in Cameroon. Furthermore, it examines various machine learning models applied to crop yield prediction, their performance, and the challenges involved. This background forms the theoretical and empirical basis for this research.
+   
+
+\section{General Concepts on Yield Modelling}
+    \subsection{The need for Yield Estimation}
+    Predicting yields accurately offer an opportunity to decision makers to combat food in
+security. Estimation of yield for main crops such as wheat, corn, rice is of importance
+ to countries. Yield estimation assist in developing plans for food production, distribution
+ and consumption in preparation for food shortages and supply shocks \cite{cameroon_agro}. Food shortages
+ results from various combination of factors, either human induced or natural occurrences\cite{Mandal2023}. There are various methods and models that have
+ been used for yield estimation. These methods and models includes; regression, simulation, expert systems, and artificial neural networks\cite{Joshua2022}. The models
+ maybe either linear or non-linear systems. The linear systems assumes linear relation
+ships among the input parameters,while non-linear assumes non-linearity\cite{okafor2019phenological}. Therefore,
+ most of the linear models are not able perform well because of complexity and non
+linear nature of the data\cite{jorvekar2024predictive}.
+ Linear regression approaches have been widely used \cite{suruliandi2021crop}.
+ 
+ Linear regression approaches have been widely used\cite{momenpour2024bibliometric}.
+mainly, because of ease of use and standard accepted tests of reliability. Which tends
+ to favour regression, despite problems with predictive accuracy caused by dependence
+ on the specific conditions of the input data used to develop the regression \cite{yan2025crop}. Multiple linear regression (MLR) modelling is also very powerful technique
+ and is widely used to estimate linear relationship\cite{Habibi2024}. Its assumption of linearity in variable
+ relationship is also its limitation. Which in real situation is rarely satisfied. Also, if
+ there are several predictors, it is well nigh impossible to have an idea of the underly
+ing non-linear functional relationship between response and predictor variables\cite{Cao2021}.
+ \begin{figure}[h] % Positioning parameter: h (here), t (top), b (bottom), p (page)
+    \centering
+    \includegraphics[width=0.6\textwidth]{Figure/Yield_Table.png} % Adjust width as needed
+    \caption{Yield Information in Cameroun. \textit{Source : MINEPAD 2024} }
+    \label{fig:example} % Label for referencing
+\end{figure}
+\subsection{Crop Calendar}
+ The time of planting is the most critical factor in farming. To realize high yields from
+ maize, planting should be done at the onset of rainfall\cite{Liu2021}. This allows the germinating
+ seed to benefit from the nitrogen flux effect which occurs within the first rains Atlas
+ (2013). In Cameroon, different regions have different planting times\cite{cameroon_agro}. the Western Highlands is a
+ highland- receives high rainfall. The planting time is between March to Mid-April
+ and the harvesting is between July and September\cite{cameroon_agro}. For the highlands, the growing
+ duration takes about 180-270 days\cite{Desloires2023}. The Figure 2.2 shows the calendar
+ seasons experienced in Cameroon.
+ \begin{figure}[h] % Positioning parameter: h (here), t (top), b (bottom), p (page)
+    \centering
+    \includegraphics[width=0.7\textwidth]{Figure/Crop Calendar.png} % Adjust width as needed
+    \caption{Maize Calendar in Cameroon.\textit{Source:FAOSTAT: https://www.fao.org/faostat/en/#home} }
+    \label{fig:example} % Label for referencing
+\end{figure}
+
+
+\section{Predictive Analytics in Agiculture}
+Globally, research in precision agriculture and predictive modelling has expanded significantly due to the availability of big data, remote sensing technologies, and increased computational capabilities\cite{adebayo2021explainable}. For instance, studies in the United States and China have demonstrated how Random Forest and Gradient Boosting Machines can accurately predict yields for crops like maize, wheat, and rice using satellite imagery, weather data, and soil characteristics\cite{Joshua2022}.
+
+In India developed a deep learning-based framework for rice yield prediction using long short-term memory (LSTM) networks, achieving higher accuracy than traditional models\cite{Perich2023}. Similarly, Chlingaryan et al. (2018)\cite{Liu2023} emphasized the integration of hyperspectral imaging with ML models for real-time crop monitoring, indicating a shift towards automation in farm management\cite{singh2008growing}.
+\subsection{Predictive Analytics In Africa}
+In sub-Saharan Africa, the application of predictive analytics is still emerging\cite{cameroon_agro}. Studies in Nigeria, Kenya, and Ethiopia have explored ML-based approaches for crop classification, yield forecasting, and disease detection\cite{Zhou2023}. However, a lack of infrastructure, limited access to technology, and sparse data hinder large-scale deployment\cite{Chaudhari2021}.
+
+For instance, \cite{Mwaura2021}implemented a Random Forest model for cassava yield prediction in Nigeria and achieved acceptable accuracy despite limited data. A study in Ethiopia by Taffese et al. (2019)\cite{taffese2019determinants} used a combination of satellite data and weather inputto predict wheat yields using Gradient Boosting, demonstrating the potential of ML in regions with modest data infrastructure\cite{Benti2024}.
+\subsection{Predictive Analytics In Cameroon}
+In Cameroon, research on predictive analytics in agriculture remains limited but promising\cite{Perich2023}. The agricultural sector is a key driver of the economy, and crop yield variability due to climate change, poor soil management, and pest infestations remains a major challenge\cite{cameroon_agro}.
+
+Few studies have applied machine learning models to crop yield prediction in Cameroon. One such study by \cite{Chaudhari2021}explored the use of SVM for predicting maize yield based on historical weather data in the West Region. Although results showed promise, data limitations and lack of expertise in AI tools constrained model effectiveness. Additionally, government and research institutions such as IRAD (Institute of Agricultural Research for Development) have started collecting digitized farm data, but integration with ML frameworks remains nascent\cite{Maimaitijiang2020}.
+\section{Machine Learning Approaches to Crop Yield Prediction}
+\begin{enumerate}
+  \item \textbf{Linear Regression and Decision Trees}: Early models used linear regression and decision trees due to their simplicity and interpretability\cite{Gorelick2017}. However, their predictive power is limited when handling complex nonlinear relationships among variables.
+  \item \textbf{Random Forests and Gradient Boosting}: Ensemble models like Random Forests (RF) and XGBoost have been widely adopted for yield prediction because of their robustness and ability to handle heterogeneous data types\cite{Li2022}.
+  \item \textbf{Artificial Neural Networks (ANNs)}: These models can capture intricate data patterns and have shown promising results in yield forecasting when sufficient data is available\cite{Mandal2023}.
+  \item \textbf{Deep Learning Models}: CNNs and LSTM networks, primarily used in image and sequence analysis respectively, are gaining popularity in agricultural predictions. These models are suitable for analysing multispectral satellite imagery and sequential weather data\cite{singh2008artificial}.
+  \item \textbf{Transfer Learning(Ensemble Learning)}: This approach has been used to leverage pre-trained models from other regions or crops to enhance performance in low-resource settings. This is especially important in regions like sub-Saharan Africa where labeled datasets are scarce\cite{Suarez2024}.
+\end{enumerate}
+\section{Related Works}
+Recent advances in machine learning and remote sensing have significantly improved crop yield prediction capabilities across diverse agricultural systems\cite{momenpour2024bibliometric}. This table synthesizes key methodologies, datasets, and performance metrics from prominent studies conducted between 2018-2023\cite{Gorelick2017}, with particular attention to African contexts. The analysis highlights three critical trends: (1) increasing adoption of deep learning for spatiotemporal pattern recognition, (2) persistent challenges with data scarcity and model generalizability in smallholder systems, and (3) emerging opportunities for hybrid modeling approaches\cite{Wang2023}. The limitations column specifically identifies gaps that our proposed ConvLSTM-XGBoost hybrid architecture addresses, particularly for Cameroon's Western Highlands maize production systems.
+\setlength{\tabcolsep}{7pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{table}[H]
+\centering
+\caption{Comparative analysis of Crop Yield Prediction related Studies}
+\label{tab:related-studies}
+\small                               % shrink a bit if needed
+\begin{tabularx}{\textwidth}{%
+  |>{\centering\arraybackslash}p{3.79cm}% Study
+  |>{\centering\arraybackslash}p{2.0cm}%{4.2cm Region/Crop
+  |>{\centering\arraybackslash}X% Methods
+  |>{\centering\arraybackslash}X% Key Features
+  |>{\centering\arraybackslash}p{1.95cm}% Performance
+  |>{\centering\arraybackslash}X% Limitations
+  |}
+\hline
+\textbf{Author and Year} & \textbf{Region/Crop} & \textbf{Methods} & \textbf{Key Features} & \textbf{Performance} & \textbf{Limitations} \\
+\hline
+Mbaabu et al. (2024) \cite{mbaabu2024} &
+Cameroon/Maize &
+LSTM, GRU &
+Geospatial climatic data &
+High accuracy in climate-based prediction &
+Lacks soil/agronomic integration \\
+\hline
+El Bilali et al. (2024) \cite{elbilali2024} &
+Cameroon/Maize &
+ML models (RF) &
+Meteorological variables &
+Good yield modeling &
+No multisource fusion \\
+\hline
+Dai et al. (2024) \cite{dai2024} &
+Africa/Maize & ML/DL/base Models &
+High-res yield mapping &
+Continent-wide scalability &
+Limited microclimate adaptation \\
+\hline
+Wang et al. (2025) \cite{smartag2025} &
+General/Maize &
+Ensemble ML &
+VIs, soil, topography &
+Robust, scalable &
+On-farm focus, less spatiotemporal \\
+\hline
+Chigwada et al. (2023) \cite{chigwada2023} &
+General/Maize &
+Linear Regression, etc. &
+Climate, soil &
+Baseline performance &
+No hybrids \\
+\hline
+Chang et al. (2023) \cite{chang2023} &
+General/Maize &
+Data-driven process model &
+Historical data &
+Temporal/spatial accuracy &
+Data quality dependence \\
+\hline
+Paudel et al. (2022) \cite{paudel2022} &
+SSA/Maize &
+ML emulators + APSIM &
+Yield, soil carbon &
+Fast predictions &
+Model coupling complexity \\
+\hline
+Ahmed (2023) \cite{ahmed2023} &
+General/Maize &
+MLP + Flamingo Optimization &
+Historical yields &
+Optimized accuracy &
+Limited to optimization \\
+\hline
+Kerner et al. (2022) \cite{kerner2022} &
+SSA/Maize &
+EO + ML &
+Subnational forecasts &
+Operational utility &
+Data gaps in remote areas \\
+\hline
+Fosto et al. (2022) \cite{Liu2021} &
+General/Crops &
+ML models &
+Climate only &
+Feature-focused &
+Excludes soil/nutrients \\
+\hline
+Shahhosseini et al. (2021) \cite{shahhosseini2021} &
+General/Crops &
+LSTM + XGBoost &
+Multisource &
+Improved predictions &
+Economic focus \\
+\hline
+van Klompenburg et al. (2020) \cite{vanklompenburg2020} &
+General/Crops &
+Hybrid ML &
+Historical yields &
+Reliable method &
+ lacks Generalization \\
+\hline
+Oikonomidis et al. (2022) \cite{oikonomidis2022} &
+General/Crops &
+XGBoost + DL (RNN/LSTM) &
+Multisource &
+High performance &
+Hybrid complexity \\
+\hline
+Dai et al. (2024) \cite{dai2024climate} &
+China/Climate (applicable) &
+ConvLSTM + XGBoost &
+Spatiotemporal &
+Validation in mountains &
+Not agriculture-specific \\
+\hline
+\end{tabularx}
+\end{table}
+\section{Gaps Identified in the Survey}
+While global studies show significant advancement in crop yield prediction using ML techniques, the African and Cameroonian contexts lag behind due to several constraints. The following gaps have been identified:
+\subsection{Knowledge Gap}
+A knowledge gap refers to a lack of information or understanding in existing research about a specific topic or issue. It highlights what is not yet known or fully explored.The following knowledge gap were sorted out:
+\begin{itemize}
+  \item Limited integration of satellite time-series with local soil data
+  \item Most studies focus on generalized crop prediction without tailoring solutions to Cameroon’s specific agro-ecological zones.
+  \item Limited integration of local weather variability, soil fertility, and traditional farming practices in predictive models.
+\end{itemize}
+
+\subsection{Methodological Gap}
+A methodological gap arises when current methods are inadequate or outdated for addressing a specific research problem, or when a new approach has not been applied yet.The following methodological gaps were observed:
+\begin{itemize}
+  \item Heavy reliance on supervised learning; underuse of hybrid models like ensemble methods, time-series deep learning.
+  \item Lack of explainability in ML models that is, few works incorporate explainable AI (XAI) for farmer trust and adoption.
+  \item Poor model optimization or cross-validation strategies, especially in imbalanced or sparse agricultural datasets.
+\end{itemize}
+\subsection{Data Availability Gap}
+A data availability gap occurs when relevant data is missing, incomplete, or inaccessible, limiting the ability to conduct comprehensive research or make informed decisions.Here are some gaps that were observed from the data:
+\begin{itemize}
+  \item Scarcity of labeled and high-resolution crop yield datasets for Cameroon 
+  \item Poor integration of satellite imagery, remote sensing, and google earth engine data with ground truth for local farms.
+  \item Lack of public, centralized, and up-to-date agricultural data repositories for machine learning research in Central Africa.
+\end{itemize}
+\section{Conclusion}
+The literature review highlights the transformative potential of predictive analytics in agriculture, particularly through machine learning techniques like Random Forests, ANNs, and deep learning models \cite{Chaudhari2021}. Globally, these approaches have improved yield forecasting accuracy, but their application in sub-Saharan Africa, and Cameroon specifically, remains limited due to data scarcity, infrastructure constraints, and a lack of region-specific models \cite{Yang2021}. The identified gaps—limited integration of localized data, underutilization of hybrid models, insufficient validation, and lack of explainability—justify the need for this study. By developing a hybrid ConvLSTM-XGBoost model that leverages spatiotemporal satellite data and ground-based measurements, this research addresses these gaps, offering a scalable and interpretable solution for maize yield prediction in the Western Highlands. The findings are expected to enhance precision agriculture, support food security initiatives, and provide a framework for future research in data-scarce regions \cite{Gorelick2017}.
+
+
+
+
+
+
+
+
+
+
+
+

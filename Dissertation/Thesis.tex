@@ -1,0 +1,220 @@
+\documentclass[12pt,a4paper]{report}
+\documentclass[tikz,border=5mm]{standalone}
+
+
+
+
+
+% === Thesis Formatting Specifications ===
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2.5cm,right=2.5cm]{geometry} % Margins
+\usepackage{times} % Times New Roman (or closest match)
+\usepackage{setspace} % For line spacing % For customizing chapter/section font sizes
+\usepackage{titlesec}
+
+
+\onehalfspacing
+
+% Chapter title: 16pt bold
+\titleformat{\chapter}
+  {\normalfont\fontsize{16}{20}\bfseries}
+  {\thechapter}{1em}{}
+
+% Section title: 14pt bold
+\titleformat{\section}
+  {\normalfont\fontsize{14}{18}\bfseries}
+  {\thesection}{1em}{}
+
+% Subsection title: 14pt bold
+\titleformat{\subsection}
+  {\normalfont\fontsize{14}{18}\bfseries}
+  {\thesubsection}{1em}{}
+  % Subsubsection title: 14pt bold
+\titleformat{\subsubsection}
+  {\normalfont\fontsize{14}{18}\bfseries}
+  {\thesubsection}{1em}{}
+
+%------------------- declaring packages---------------------------------
+
+
+% styling and graphics-based
+
+\usepackage{graphicx} 
+\usepackage{emptypage}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{pgf}
+\usepackage{pgffor}
+\doublespacing
+
+% for figures and tables
+
+% figures:
+\usepackage{tikz}
+\usepackage{caption}
+\usetikzlibrary{shapes,arrows,positioning}
+\usepackage{subfigure}  
+\usepackage{adjustbox}
+\usepackage{wrapfig}
+\usepackage{subfigure}
+\usepackage{rotating}
+\usepackage{lscape}
+% tables:
+\usepackage{tabularx,ragged2e,booktabs,caption}
+\usepackage{multicol,tabularx,capt-of}
+\usepackage{hhline}
+\usepackage{multirow}
+\usepackage{array}
+
+
+
+% for math equations
+
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{verbatim}
+\usepackage{amsmath} 
+\usepackage{amsthm}   
+
+
+% for acronyms and glossaries
+
+\usepackage{acronym}
+\usepackage{glossaries}
+
+
+% for hyperlinks
+
+\usepackage[square]{natbib}
+\usepackage[colorlinks = true,
+            linkcolor = black,
+            urlcolor  = black,
+            citecolor = blue,
+            anchorcolor = blue]{hyperref}
+
+\usepackage{sectsty}
+\allsectionsfont{\bfseries}
+\chapterfont{\centering\Large}
+\sectionfont{\normalsize}
+\subsectionfont{\normalsize}
+
+
+\usepackage [english]{babel}
+\usepackage [autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
+
+
+
+% header formatting
+\usepackage{layout}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\fancyhead[L]{\textbf{\nouppercase{\rightmark}}}
+\fancyfoot[L]{}
+
+
+\fancypagestyle{custompagestyle}{%
+    \fancyhf{}
+    \fancyhead[R]{\thepage}
+}
+
+\fancypagestyle{noheaderfooter}{%
+    \fancyhf{} % Clear header and footer
+    \renewcommand{\headrulewidth}{0pt} % Remove header line
+}
+
+%footer formatting
+
+\interfootnotelinepenalty=10000 
+
+\usepackage{epstopdf}
+
+%----------------------------begin document-------------------------------
+
+\begin{document}
+%\frontmatter
+\pagenumbering{roman}
+
+\input{titlepage}
+\chapter*{Dedication}\
+\vspace{2cm}
+\begin{center}
+\Large{\textbf{TO MY FATHER  KING EYIDI                            NGANDO ALPHONSE}}
+\end{center}
+
+\addcontentsline{toc}{chapter}{Dedication}
+\chapter*{Acknowledgements}
+
+We would like to sincerely thank everyone who supported us throughout the course of this
+ dissertation. We are thankful for the inspiring guidance, constructive criticism and friendly advice
+ throughout the course of our project. This dissertation in itself was a challenge and provided an
+ immaculate learning experience to us. We particularly thank:
+
+\begin{itemize}
+    \item \textbf{Mr. Paul GUIMEZAP}, Founding President of the IUC, for the high-quality training provided at his institution;
+    \item \textbf{Dr. KENOU Willy}, Director of SEAS, for his exceptional leadership, attentiveness, and support;
+    \item \textbf{My supervisor, Dr. FOZIN Theophile}, whose encouragement and guidance provided an excellent environment for this research. His patience and advice were crucial in enabling me to complete this work;
+    \item The viva voice from all seminars, \textbf{Prof. Elie Fute}, and \textbf{Dr. Tabueu Fotso Laurent}, whose corrections and remarks significantly improved this work;
+   
+    \item My precious family for all their support;
+    \item Above all, I would like to thank the ALL-POWERFUL GOD who gave me good health,
+ strength, and wisdom for the achievement of this project.
+\end{itemize}
+
+
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+\clearpage
+\chapter*{Abstract}
+
+
+Facing the critical challenge of unpredictable maize yields in Cameroon's Western Highlands, a region vital to national food security yet plagued by climate variability and soil degradation.This research dissertation engineered a sophisticated predictive analytics framework centered on a novel hybrid ConvLSTM-XGBoost model. The methodology integrated a comprehensive multisource dataset spanning satellite-derived vegetation indices (NDVI, EVI, LST), high-resolution climate records, detailed soil properties (pH, N/P/K, organic matter), and agronomic practices, which was subjected to rigorous preprocessing and advanced feature engineering to create meaningful agronomic predictors like Growing Degree Days and a Rainfall Effectiveness Index tailored to the region's ecology. The architecture uniquely synergizes a Convolutional Long Short-Term Memory (ConvLSTM) network to decode complex spatiotemporal patterns from sequential satellite data with the powerful gradient-boosting capabilities of XGBoost on static variables, fused through an attention mechanism to dynamically weigh the contribution of each data modality. The model's exceptional performance, achieving an R² of 0.85, an RMSE of 0.62 tons/ha, and an MAE of 0.48 tons/ha, not only validated all proposed hypotheses but also significantly surpassed existing benchmarks for the region, a claim further substantiated through ablation studies that quantified a 13\% decrease in explanatory power without the ConvLSTM component. Model interpretability, achieved through SHAP (SHapley Additive exPlanations), unequivocally identified climatic and vegetative factors (NDVI and rainfall) as the paramount yield drivers, offering transparent, actionable insights for stakeholders, while the model's robustness and generalizability were conclusively proven through Leave-One-Region-Out (LORO) cross-validation, which maintained an average R² of 0.82 across diverse microclimates. 
+
+\textbf{Keywords:} Predictive Analytics, Crop Yield Modelling, Machine Learning, ConvLSTM, XGBoost, SHAP, Precision Agriculture, Food Security, Cameroon.
+\addcontentsline{toc}{chapter}{Abstract}
+
+\tableofcontents{}
+\addcontentsline{toc}{chapter}{Table of Contents}
+
+\listoftables{}
+\addcontentsline{toc}{chapter}{List of Tables}
+
+\listoffigures{}
+\addcontentsline{toc}{chapter}{List of Figures}
+
+
+\include{Acronyms}
+\thispagestyle{noheaderfooter}
+
+
+
+\clearpage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+
+
+\include{Chapter1}
+
+\include{Chapter2}
+
+\include{Chapter3}
+
+\include{Chapter4}
+
+\include{Chapter5}
+
+
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{ieeetr}
+\bibliography{References}
+
+\appendix
+\include{AppendixA}
+\include{AppendixB}
+\include{AppendixC}
+
+\addcontentsline{toc}{chapter}{Appendices}
+
+\end{document}

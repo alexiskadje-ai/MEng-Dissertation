@@ -1,0 +1,23 @@
+\chapter{Custom Attention Mechanism Implementation}
+\label{app:attention_implementation}
+
+This appendix documents the custom Temporal Attention layer implemented in TensorFlow/Keras, which was used in the fusion mechanism of the hybrid ConvLSTM-XGBoost model. This layer allows the model to dynamically weigh the importance of different time steps in the sequential data.
+
+Figure \ref{fig:attention_code} shows the source code for the custom layer, which computes a context vector by applying attention weights to the input sequence.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figure/Attention.png} % Adjust width as needed
+    \caption{Source code implementation of the custom Temporal Attention layer.}
+    \label{fig:attention_code}
+\end{figure}
+
+The layer operates by:
+\begin{itemize}
+    \item Taking two inputs: a `query` (typically the current state) and `values` (the sequence to attend over).
+    \item Computing a score for each time step using a feed-forward network and a tanh activation.
+    \item Applying a softmax function to generate attention weights.
+    \item Producing a context vector as a weighted sum of the input values based on these weights.
+\end{itemize}
+
+This attention mechanism was crucial for enabling the model to focus on the most relevant temporal features from the ConvLSTM output before fusion with the static features processed by XGBoost.

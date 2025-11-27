@@ -1,0 +1,98 @@
+
+
+% --- CUSTOM COMMANDS / SETTINGS ---
+\pagestyle{empty} % No page numbers on the cover page
+\linespread{1.2} % Adjust line spacing for better readability
+
+% Function to create the "REPUBLIC OF CAMEROON" and "MINISTERE..." blocks
+% This helps with alignment and spacing for the dual language headers
+\newcommand{\countryheader}[1]{%
+    \parbox[t]{0.45\textwidth}{\Centering #1}%
+}
+\newcommand{\ministryheader}[1]{%
+    \parbox[t]{0.45\textwidth}{\Centering #1}%
+}
+
+\begin{titlepage}
+
+% --- TOP SECTION (Country Headers) ---
+\begin{center}
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{center}
+            \textbf{REPUBLIC OF CAMEROON} \\
+            Peace-Work-Fatherland \\
+            \dots \\
+            \textbf{MINISTRY OF HIGHER EDUCATION}
+        \end{center}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{center}
+            \textbf{REPUBLIQUE DU CAMEROUN} \\
+            Paix-Travail-Patrie \\
+            \dots \\
+            \textbf{MINISTÈRE DE L’ENSEIGNEMENT SUPÉRIEUR}
+        \end{center}
+    \end{minipage}
+\end{center}
+
+
+% Add some vertical space
+\vspace{1.0cm} % Adjust this value as needed for the vertical separation
+
+% --- LOGOS SECTION ---
+\begin{center}
+    \includegraphics[width=0.18\textwidth]{Figure/UB Logo.jpg} % University of Buea Logo
+    \hspace{2.5cm} % Adjust horizontal space between logos
+    \includegraphics[width=0.22\textwidth]{Figure/SEAS Logo.jpg} % ASEAS Logo
+    \hspace{2.5cm} % Adjust horizontal space between logos
+    \includegraphics[width=0.18\textwidth]{Figure/IUC_Logo.png} % IUC Logo
+\end{center}
+
+% Add more vertical space after logos
+\vspace{0.8cm} % Adjust this value
+
+% --- THESIS TITLE ---
+\begin{center}
+    \Large \textbf{PREDICTIVE ANALYTICS FOR CROP YIELD MODELLING} \\
+    \Large \textbf{ CASE STUDY OF MAIZE IN WESTERN HIGLANDS OF CAMEROON} \\
+    
+\end{center}
+
+% Add more vertical space
+\vspace{0.1cm}
+
+% --- AUTHOR INFORMATION ---
+\begin{center}
+    BY \\
+    \vspace{0.3cm} % Small space before author name
+    \textbf{\Large KADJE KAMGA ALEX \\}
+    \textbf{\normalsize IUC20E0060145 \\}
+    Bachelor of Science in Information Systems Engineering
+\end{center}
+
+% Add more vertical space
+\vspace{0.0cm}
+
+% --- THESIS SUBMISSION STATEMENT ---
+\begin{center}
+    \normalsize
+    A Dissertation submitted to the \textbf{School of Engineering and Applied Science of the Institut} \\
+    \textbf{Universitaire de la Côte} in partial fulfillment of the requirements for the award of the \\
+    \textbf{Masters of Engineering in Data Science and Artificial Intelligence}
+\end{center}
+
+% Add more vertical space
+\vspace{0.3cm} % Adjust this to push supervisor/lecturer to the bottom
+
+% --- SUPERVISOR AND LECTURER ---
+\begin{center}
+    Supervisor \\
+    \vspace{0.1cm}
+    \textbf{FOZIN FONZIN Theophile, PhD} \\
+    Lecturer \\
+    \textbf{ACADEMIC YEAR 2024-2025}
+\end{center}
+
+
+\end{titlepage}

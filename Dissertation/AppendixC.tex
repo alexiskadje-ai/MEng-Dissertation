@@ -1,0 +1,21 @@
+\chapter{Branch Impact and Interpretability Analysis}
+\label{app:branch_impact}
+
+This appendix details the methodology used to analyze the relative importance of the two main branches in the hybrid architecture: the ConvLSTM spatiotemporal branch and the XGBoost tabular data branch. The analysis combined gradient-based techniques for the neural network components with SHAP analysis for the tree-based model.
+
+Figure \ref{fig:branch_impact_code} shows the implementation of the custom analysis functions used to quantify each branch's contribution to the final prediction.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figure/Branch_Impact.png} % Adjust width as needed
+    \caption{Source code for branch impact analysis and SHAP interpretability implementation.}
+    \label{fig:branch_impact_code}
+\end{figure}
+
+The analysis involved two key components:
+\begin{itemize}
+    \item \textbf{Branch Impact Analysis}: A custom function that uses TensorFlow's GradientTape to compute gradients of the final prediction with respect to the outputs of each branch. The mean absolute gradient values provide a measure of each branch's influence on the model's decisions.
+    \item \textbf{SHAP Analysis}: Implementation of SHapley Additive exPlanations (SHAP) for the XGBoost component, providing detailed feature-level interpretability for the tabular data branch and identifying the most influential static features on model predictions.
+\end{itemize}
+
+This multi-faceted approach to model interpretability was essential for validating the hybrid architecture's design and providing actionable insights into the prediction process.

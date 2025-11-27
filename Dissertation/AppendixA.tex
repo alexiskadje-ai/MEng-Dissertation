@@ -1,0 +1,15 @@
+\chapter{ConvLSTM Model Architecture}
+\label{app:model_architecture}
+
+This appendix presents the architecture of the Convolutional Long Short-Term Memory (ConvLSTM) model used for spatiotemporal feature extraction in the hybrid prediction framework.
+
+Figure \ref{fig:model_seq} illustrates the model's sequential structure, detailing the layers, output shapes, and the number of parameters at each stage. The architecture was designed to effectively process sequences of satellite imagery and climatic data for maize yield prediction.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figure/Model_Seq.png} % Adjust width as needed
+    \caption{Sequential architecture summary of the ConvLSTM model.}
+    \label{fig:model_seq}
+\end{figure}
+
+The architecture consists of a core ConvLSTM2D layer for spatiotemporal processing, followed by batch normalization for training stability. The output is then flattened and passed through a series of dense layers with dropout regularization to produce a final predictive feature vector for fusion with the XGBoost branch.
