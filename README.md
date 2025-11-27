@@ -6,7 +6,7 @@
 
  Overview
 
-This repository contains the complete implementation of my Master's dissertation: **"Predicting Maize Yield in Western Highlands using Satellite Imagery, Climate Data, and Soil Properties"**. The research develops a hybrid machine learning framework that integrates multi-source geospatial and agricultural data to predict maize yields with uncertainty quantification.
+This repository contains the complete implementation of my Master's dissertation: "PREDICTIVE ANALYTICS FOR CROP YIELD MODELLING CASE OF MAIZE IN THE WESTERN HIGHLANDS OF CAMEROON". The research develops a hybrid machine learning framework that integrates multi-source geospatial and agricultural data to predict maize yields with uncertainty quantification.
  Research Objectives
 
 - Develop a hybrid ConvLSTM-XGBoost model for spatio-temporal yield prediction
@@ -51,5 +51,5 @@ The hybrid architecture combines:
 
 1. Clone the repository
 bash
-git clone https://github.com/yourusername/MSc-Dissertation-Maize-Yield-Prediction.git
-cd MSc-Dissertation-Maize-Yield-Prediction
+git clone https://github.com/yourusername/MEng-Dissertation-Maize-Yield-Prediction.git
+cd MEng-Dissertation-Maize-Yield-Prediction
